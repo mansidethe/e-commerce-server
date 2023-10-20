@@ -1,31 +1,38 @@
 import express from 'express'
-import mongoos from 'mongoos'
+import mongoose from 'mongoose'
+import dotenv from 'dotenv';
+import Product from './models/product.js'
+
+dotenv.config();
+
 
 const app = express();
 app.use(express.json())
 
-const MONGODB_URI ='mongodb+srv://mansidethe18:mansi@7378582489@cluster0.8zctcw4.mongodb.net/'
+//mongodb connection
+const connectMongoDB = async () =>{
+  const conn = await mongoose.connect(process.env.MONGODB_URI)
 
-const students = [];
+  if(conn){
+    console.log('MongoDB connected successfully.');
+  }
+};
+connectMongoDB();
 
-app.get('/health',(req, res)=>{
+app.get('/products',async (req,res)=>{
+
+const findigproduct = await Product.find()
     res.json({
-        status:'all good all set'
-    })
-})
-
-app.get('/students',(req,res)=>{
-    res.json({
-      sucess: true,
-      data:students,
-      message: 'successfully fetch all students'
+      
+      data: findigproduct
+      
     })
 });
 
-app.post('/student',(req, res)=>{
-   const {name, age, mobile, email}= req.body;
+app.post('/product',async (req, res)=>{
+   const {name, description, price, productImage,brand}= req.body;
    if(!name){
-    return res,json({
+    return res.json({
         sucess:false,
         message:'name is required',
 
@@ -33,74 +40,90 @@ app.post('/student',(req, res)=>{
    }
 
 
-   if(!age){
-    return res,json({
+   if(!description){
+    return res.json({
         sucess:false,
-        message:'age is required',
+        message:'description is required',
 
     })
    }
 
-   if(!mobile){
-    return res,json({
+   if(!price){
+    return res.json({
         sucess:false,
-        message:'mobile is required',
+        message:'price is required',
 
     })
    }
 
-   if(!email){
-    return res,json({
+   if(!productImage){
+    return res.json({
         sucess:false,
-        message:'email is required',
+        message:'productImage is required',
 
     })
    }
 
-   const id = Math.floor(Math.random()* 100000)+1;
+   if(!brand){
+    return res.json({
+        sucess:false,
+        message:'brand is required',
 
-
-   const newStudent = {
-    'id':id,
-    'name':name,
-    'age':age,
-    'email':email
+    })
    }
+   
+//model object
 
-   students.push(newStudent);
+   const newProduct = new Product({
+    name:name,
+    description:description,
+    price:price,
+    productImage:productImage,
+    brand:brand
+   })
+
+const savedProduct = await newProduct.save();
 
    res.json({
     sucess:true,
-    data:newStudent,
-    message:'Successfully added new student'
-   })
+    data:savedProduct,
+    message:'Sucessfully fetched student'
 })
+});
 
-app.get('/student',(req,res)=>{
-const {id} = req.query;
-let student = null;
+app.get('/product',(req,res)=>{
+    const {id} = req.query;
+    let product = null;
 
-student.forEach((stud)=>{
-    if(stud.id== id){
-        student = stud;
-    }
-})
+   const newProduct = {
+    'id':id,
+    "name":name,
+    "description":description,
+    "price":price,
+    "productImage":productImage,
+    "brand":brand
+   }
 
-if(student == null){
+
+
+
+
+// student.forEach((stud)=>{
+//     if(stud.id== id){
+//         student = stud;
+//     }
+// })
+
+if(product == null){
     return res.json({
         sucess:false,
-        message:'Student not found',
+        message:'Product not found',
     })
 }
 
-res.json({
-    sucess:true,
-    data:student,
-    message:'Sucessfully fetched student',
-})
 })
 
-const PORT=5000;
+const PORT=8080;
  
 app.listen(PORT, ()=>{
      console.log(`Server is running on port ${PORT}`)
