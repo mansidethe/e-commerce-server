@@ -1,10 +1,10 @@
 import express from 'express'
 import mongoose from 'mongoose'
 import dotenv from 'dotenv';
-import Product from './models/product.js'
 
 dotenv.config();
 
+import Product from './models/product.js'
 
 const app = express();
 app.use(express.json())
@@ -87,7 +87,7 @@ const savedProduct = await newProduct.save();
    res.json({
     sucess:true,
     data:savedProduct,
-    message:'Sucessfully fetched student'
+    message:'Sucessfully fetched product'
 })
 });
 
@@ -104,15 +104,6 @@ app.get('/product',(req,res)=>{
     "brand":brand
    }
 
-
-
-
-
-// student.forEach((stud)=>{
-//     if(stud.id== id){
-//         student = stud;
-//     }
-// })
 
 if(product == null){
     return res.json({
